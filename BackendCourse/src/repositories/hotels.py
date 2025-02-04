@@ -31,10 +31,10 @@ class HotelsRepository(BaseRepository):
 
         return result.scalars().all()
 
-    async def add(self, hotels_data):
-
-        add_hotel_stmt = insert(HotelsOrm).values(hotels_data.model_dump())
-
-        await self.session.execute(add_hotel_stmt)
+    # async def add(self, hotels_data):
+    #
+    #     add_hotel_stmt = insert(HotelsOrm).values(hotels_data.model_dump())
+    #
+    #     await self.session.execute(add_hotel_stmt)
 
 
