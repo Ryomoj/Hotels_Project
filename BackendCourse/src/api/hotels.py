@@ -3,7 +3,7 @@ from fastapi import Query, APIRouter, Body
 from src.api.dependencies import PaginationDep
 from src.database import async_session_maker
 from src.repositories.hotels import HotelsRepository
-from src.schemas.hotels import HotelNEW, HotelPATCH
+from src.schemas.hotels import HotelSchema, HotelPatchSchema, HotelAddSchema
 
 router = APIRouter(prefix='/hotels', tags=['Отели'])
 
@@ -32,7 +32,7 @@ async def get_hotel(hotel_id: int):
 
 # Эндпоинт создания нового отеля
 @router.post('', summary='Создать новый отель')
-async def create_hotel(hotel_data: HotelNEW = Body(openapi_examples={
+async def create_hotel(hotel_data: HotelAddSchema = Body(openapi_examples={
     '1': {'summary': 'Сочи', 'value': {
         'title': 'Отель 5 звезд у моря',
         'location': 'город Сочи, у. Моря, 2'
@@ -51,7 +51,7 @@ async def create_hotel(hotel_data: HotelNEW = Body(openapi_examples={
 
 # Эндпоинт для полного изменения отеля
 @router.put('/{hotel_id}', summary='Изменить информацию об отеле')
-async def put_hotel(hotel_id: int, hotel_data: HotelNEW):
+async def put_hotel(hotel_id: int, hotel_data: HotelAddSchema):
 
     async with async_session_maker() as session:
         await HotelsRepository(session).edit(hotel_data, id=hotel_id)
@@ -62,7 +62,7 @@ async def put_hotel(hotel_id: int, hotel_data: HotelNEW):
 
 # Эндпоинт для частичного или полного изменения отеля
 @router.patch('/{hotel_id}', summary='Частичная правка отеля')
-async def partially_edit_hotel(hotel_id: int, hotel_data: HotelPATCH):
+async def partially_edit_hotel(hotel_id: int, hotel_data: HotelPatchSchema):
 
     async with async_session_maker() as session:
         await HotelsRepository(session).edit(hotel_data, exclude_unset=True, id=hotel_id)
