@@ -1,8 +1,8 @@
-"""add bookings
+"""bookings added
 
-Revision ID: efb78e44da5b
+Revision ID: 16c87384f16e
 Revises: d58cd77d43db
-Create Date: 2025-02-13 17:21:12.386442
+Create Date: 2025-02-13 20:05:09.053474
 
 """
 
@@ -12,7 +12,7 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision: str = "efb78e44da5b"
+revision: str = "16c87384f16e"
 down_revision: Union[str, None] = "d58cd77d43db"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -23,7 +23,7 @@ def upgrade() -> None:
         "bookings",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("room_id", sa.Integer(), nullable=False),
-        sa.Column("users_id", sa.Integer(), nullable=False),
+        sa.Column("user_id", sa.Integer(), nullable=False),
         sa.Column("date_from", sa.Date(), nullable=False),
         sa.Column("date_to", sa.Date(), nullable=False),
         sa.Column("price", sa.Integer(), nullable=False),
@@ -32,7 +32,7 @@ def upgrade() -> None:
             ["rooms.id"],
         ),
         sa.ForeignKeyConstraint(
-            ["users_id"],
+            ["user_id"],
             ["users.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
