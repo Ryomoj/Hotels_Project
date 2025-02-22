@@ -1,20 +1,17 @@
-from fastapi import Query, APIRouter, Body
+from fastapi import APIRouter, Body
 
 from src.api.dependencies import DatabaseDep
 from src.schemas.facilities import FacilityAddSchema
 
-router = APIRouter(prefix='/hotels', tags=['Удобства'])
+router = APIRouter(prefix='/facilities', tags=['Удобства'])
 
 
 # Эндпоинт получения существующего удобства или удобств
-@router.get('/facilities', summary='Получить удобство или все удобства')
+@router.get('', summary='Получить удобство или все удобства')
 async def get_facilities(
         db: DatabaseDep,
-        # title: str | None = Query(None, description='Название удобства')
 ):
-    return await db.facilities.get_all(
-        # title=title
-    )
+    return await db.facilities.get_all()
 
 
 # Эндпоинт создания нового удобства

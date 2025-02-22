@@ -11,6 +11,10 @@ class FacilitySchema(FacilityAddSchema):
     model_config = ConfigDict(from_attributes=True)
 
 
-class FacilityPatchSchema(BaseModel):
-    title: str | None = None
+class RoomFacilityAddSchema(BaseModel):
+    room_id: int
+    facility_id: int
 
+
+class RoomFacilitySchema(RoomFacilityAddSchema):
+    id: int
