@@ -11,7 +11,7 @@ router = APIRouter(prefix='/facilities', tags=['Удобства'])
 
 # Эндпоинт получения существующего удобства или удобств
 @router.get('', summary='Получить удобство или все удобства')
-# @cache(expire=10)
+@cache(expire=10)
 async def get_facilities(db: DatabaseDep):
     print("ИДУ В БАЗУ ДАННЫХ")
     return await db.facilities.get_all()

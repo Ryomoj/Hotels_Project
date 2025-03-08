@@ -1,4 +1,12 @@
 import json
+from unittest import mock
+
+def empty_cache(*args, **kwargs):
+    def wrapper(func):
+        return func
+    return wrapper
+
+mock.patch("fastapi_cache.decorator.cache", empty_cache).start()
 
 import pytest
 
@@ -68,4 +76,28 @@ async def test_register_user(ac, setup_database):
             "password": "1234"
         }
     )
+    print("ПОЛЬЗОВАТЕЛЬ ЗАРЕГИСТРИРОВАЛСЯ")
 
+
+@pytest.fixture(scope="session", autouse=True)
+async def test_login_user(ac, test_register_user):
+    response = await ac.post(
+        "/auth/login",
+        json={
+            "email": "kot@pes.com",
+            "password": "1234"
+        }
+    )
+    assert response.cookies
+    print(f"ПОЛЬЗОВАТЕЛЬ ЗАЛОГИНИЛСЯ, {response.cookies=}")
+
+
+# Так пишутся обычные декораторы
+
+# def empty_cache(*args, **kwargs):
+#     def wrapper(func):
+#         def inner():
+#             res = func(*args, **kwargs)
+#             return res
+#         return inner
+#     return wrapper
