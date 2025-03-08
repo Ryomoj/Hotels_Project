@@ -18,50 +18,45 @@ async def check_test_mode():
     assert settings.MODE == "TEST"
 
 
+@pytest.fixture(scope="function")
+async def db() -> DBManager:
+    async with DBManager(session_factory=async_session_maker_null_pool) as db:
+        yield db
+
+
 @pytest.fixture(scope="session", autouse=True)
 async def setup_database(check_test_mode):
     async with engine_null_pool.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 
+    with open("tests/mock_hotels.json", encoding="utf-8") as mock_hotels_file:
+        hotels_data = json.load(mock_hotels_file)
+    with open("tests/mock_rooms.json", encoding="utf-8") as mock_hotels_file:
+        rooms_data = json.load(mock_hotels_file)
 
-@pytest.fixture(scope="session", autouse=True)
-async def insert_mock_data(setup_database):
-    with open("tests/mock_hotels.json", "r") as file:
-        data = json.loads(file.read())
+    hotels_list = [HotelAddSchema.model_validate(hotel) for hotel in hotels_data]
+    rooms_list = [RoomAddSchema.model_validate(room) for room in rooms_data]
 
-        async with DBManager(session_factory=async_session_maker_null_pool) as db:
-            for i in range(len(data)):
-                hotel_data = HotelAddSchema(title=data[i]["title"], location=data[i]["location"])
-                await db.hotels.add(hotel_data)
-
-            await db.commit()
-
-    with open("tests/mock_rooms.json", "r") as file:
-        data = json.loads(file.read())
-
-        async with DBManager(session_factory=async_session_maker_null_pool) as db:
-            for i in range(len(data)):
-                room_data = RoomAddSchema(
-                    hotel_id=data[i]["hotel_id"],
-                    title=data[i]["title"],
-                    description=data[i]["description"],
-                    price=data[i]["price"],
-                    quantity=data[i]["quantity"]
-                )
-                print(room_data)
-                await db.rooms.add(room_data)
-
-            await db.commit()
+    async with DBManager(session_factory=async_session_maker_null_pool) as db_:
+        await db_.hotels.add_bulk(hotels_list)
+        await db_.rooms.add_bulk(rooms_list)
+        await db_.commit()
 
 
-@pytest.fixture(scope="session", autouse=True)
-async def test_register_user(setup_database):
+@pytest.fixture(scope="session")
+async def ac() -> AsyncClient:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-        await ac.post(
-            "/auth/register",
-            json={
-                "email": "kot@pes.com",
-                "password": "1234"
-            }
-        )
+        yield ac
+
+
+@pytest.fixture(scope="session", autouse=True)
+async def test_register_user(ac, setup_database):
+    await ac.post(
+        "/auth/register",
+        json={
+            "email": "kot@pes.com",
+            "password": "1234"
+        }
+    )
+
