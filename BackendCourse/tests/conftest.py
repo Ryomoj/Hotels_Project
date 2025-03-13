@@ -27,18 +27,18 @@ async def check_test_mode():
     assert settings.MODE == "TEST"
 
 
-async def get_db_nul_pool():
+async def get_db_null_pool():
     async with DBManager(session_factory=async_session_maker_null_pool) as db:
         yield db
 
 
 @pytest.fixture(scope="function")
 async def db() -> DBManager:
-    async for db in get_db_nul_pool():
+    async for db in get_db_null_pool():
         yield db
 
 
-app.dependency_overrides[get_db] = get_db_nul_pool
+app.dependency_overrides[get_db] = get_db_null_pool
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -79,8 +79,8 @@ async def test_register_user(ac, setup_database):
     print("ПОЛЬЗОВАТЕЛЬ ЗАРЕГИСТРИРОВАЛСЯ")
 
 
-@pytest.fixture(scope="session", autouse=True)
-async def test_login_user(ac, test_register_user):
+@pytest.fixture(scope="session")
+async def auth_ac(ac, test_register_user):
     response = await ac.post(
         "/auth/login",
         json={
@@ -88,8 +88,8 @@ async def test_login_user(ac, test_register_user):
             "password": "1234"
         }
     )
-    assert response.cookies
-    print(f"ПОЛЬЗОВАТЕЛЬ ЗАЛОГИНИЛСЯ, {response.cookies=}")
+    assert ac.cookies["access_token"]
+    yield ac
 
 
 # Так пишутся обычные декораторы
