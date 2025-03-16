@@ -1,18 +1,14 @@
+# ruff: noqa: E402, F403
 import json
 from unittest import mock
 
-def empty_cache(*args, **kwargs):
-    def wrapper(func):
-        return func
-    return wrapper
-
-mock.patch("fastapi_cache.decorator.cache", empty_cache).start()
+mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
 
 import pytest
 
 from src.api.dependencies import get_db
 from src.config import settings
-from src.database import Base, engine_null_pool, async_session_maker_null_pool
+from src.database import Base, engine_null_pool, async_session_maker_null_pool  # noqa
 from src.main import app
 from src.models import *
 from httpx import AsyncClient, ASGITransport
@@ -81,7 +77,7 @@ async def test_register_user(ac, setup_database):
 
 @pytest.fixture(scope="session")
 async def auth_ac(ac, test_register_user):
-    response = await ac.post(
+    await ac.post(
         "/auth/login",
         json={
             "email": "kot@pes.com",
@@ -100,4 +96,10 @@ async def auth_ac(ac, test_register_user):
 #             res = func(*args, **kwargs)
 #             return res
 #         return inner
+#     return wrapper
+
+
+# def empty_cache(*args, **kwargs):
+#     def wrapper(func):
+#         return func
 #     return wrapper

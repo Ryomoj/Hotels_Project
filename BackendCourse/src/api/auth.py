@@ -12,11 +12,13 @@ async def register_user(
         data: UserRequestAddSchema,
         db: DatabaseDep
 ):
-    hashed_password = AuthService().hash_password(password=data.password)
-    new_user_data = UserAddSchema(email=data.email, hashed_password=hashed_password)
-
-    await db.users.add(new_user_data)
-    await db.commit()
+    try:
+        hashed_password = AuthService().hash_password(password=data.password)
+        new_user_data = UserAddSchema(email=data.email, hashed_password=hashed_password)
+        await db.users.add(new_user_data)
+        await db.commit()
+    except:  # noqa: E722
+        raise HTTPException(status_code=400)
 
     return {'Status': 'OK'}
 
@@ -27,7 +29,6 @@ async def login_user(
         response: Response,
         db: DatabaseDep
 ):
-
     user = await db.users.get_user_with_hashed_password(email=data.email)
     if not user:
         raise HTTPException(status_code=401, detail="Пользователь с таким Email не зарегистрирован")
