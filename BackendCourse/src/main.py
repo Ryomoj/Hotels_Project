@@ -11,7 +11,6 @@ import sys
 from pathlib import Path
 
 
-
 sys.path.append(str(Path(__file__).parent.parent))
 
 from src.api.dependencies import get_db
@@ -56,5 +55,5 @@ app.include_router(router_bookings)
 app.include_router(router_images)
 
 
-if __name__ == '__main__':
-    uvicorn.run('main:app', reload=True)
+if __name__ == "__main__":
+    uvicorn.run("main:app", reload=True)

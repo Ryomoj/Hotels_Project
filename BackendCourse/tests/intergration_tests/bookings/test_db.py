@@ -11,7 +11,7 @@ async def test_booking_crud(db):
         room_id=room_id,
         date_from=date(year=2025, month=1, day=1),
         date_to=date(year=2025, month=12, day=12),
-        price=100
+        price=100,
     )
     new_booking = await db.bookings.add(booking_data)
 
@@ -30,7 +30,7 @@ async def test_booking_crud(db):
         room_id=room_id,
         date_from=date(year=2025, month=1, day=1),
         date_to=date(year=2025, month=12, day=22),
-        price=666
+        price=666,
     )
     await db.bookings.edit(updated_booking_data, id=new_booking.id)
     updated_booking = await db.bookings.get_one_or_none(id=new_booking.id)
@@ -42,4 +42,3 @@ async def test_booking_crud(db):
     await db.bookings.delete(id=new_booking.id)
     booking = await db.bookings.get_one_or_none(id=new_booking.id)
     assert not booking
-

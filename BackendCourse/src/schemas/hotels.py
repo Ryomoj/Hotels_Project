@@ -13,4 +13,3 @@ class HotelSchema(HotelAddSchema):
 class HotelPatchSchema(BaseModel):
     title: str | None = None
     location: str | None = None
-
