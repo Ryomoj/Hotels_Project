@@ -3,6 +3,7 @@ from fastapi_cache.decorator import cache
 
 from src.api.dependencies import DatabaseDep
 from src.schemas.facilities import FacilityAddSchema
+from src.services.facilities import FacilitiesService
 
 router = APIRouter(prefix="/facilities", tags=["Удобства"])
 
@@ -11,8 +12,8 @@ router = APIRouter(prefix="/facilities", tags=["Удобства"])
 @router.get("", summary="Получить удобство или все удобства")
 @cache(expire=10)
 async def get_facilities(db: DatabaseDep):
-    print("ИДУ В БАЗУ ДАННЫХ")
-    return await db.facilities.get_all()
+    facilities = await FacilitiesService(db).get_all_facilities()
+    return {"Status": "OK", "data": facilities}
 
 
 # Эндпоинт создания нового удобства
@@ -26,7 +27,6 @@ async def create_facility(
         }
     ),
 ):
-    facility = await db.facilities.add(facility_data)
-    await db.commit()
+    facility = await FacilitiesService(db).create_new_facility(facility_data)
 
     return {"Status": "OK", "data": facility}

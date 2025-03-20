@@ -1,7 +1,9 @@
 async def test_get_facilities(ac):
     response = await ac.get("/facilities")
     assert response.status_code == 200
-    assert isinstance(response.json(), list)
+    res = response.json()
+    assert "data" in res
+    assert isinstance(res, dict)
 
 
 async def test_post_facilities(ac):

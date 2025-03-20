@@ -3,7 +3,7 @@ from datetime import date
 from fastapi import HTTPException
 from sqlalchemy import select
 
-from src.exceptions import AllRoomsAreBookedException
+from src.exceptions.exceptions import AllRoomsAreBookedException, NoRoomsForBookingException
 from src.models.bookings import BookingsOrm
 from src.repositories.base import BaseRepository
 from src.repositories.mappers.mappers import BookingDataMapper
@@ -32,4 +32,4 @@ class BookingsRepository(BaseRepository):
             new_booking = await self.add(data)
             return new_booking
 
-        raise AllRoomsAreBookedException
+        raise NoRoomsForBookingException

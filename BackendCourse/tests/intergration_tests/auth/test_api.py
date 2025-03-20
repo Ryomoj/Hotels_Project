@@ -5,7 +5,7 @@ import pytest
     "login, password, status_code",
     [
         ("qwerty@mail.com", "qwerty", 200),
-        ("qwerty@mail.com", "qwerty", 400),
+        ("qwerty@mail.com", "qwerty", 409),
         ("tigerclaw@icloud.com", "tigerclaw123", 200),
         ("abcde", "4321", 422),
         ("abcde@ef", "1234", 422),

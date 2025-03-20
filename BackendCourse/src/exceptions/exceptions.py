@@ -14,12 +14,20 @@ class ObjectNotFoundException(BookingsException):
     detail = "Объект не найден"
 
 
+class HotelNotFoundException(ObjectNotFoundException):
+    detail = "Отель не найден"
+
+
+class NoRoomsForBookingException(ObjectNotFoundException):
+    detail = "Комнат для бронирования не найдено"
+
+
+class RoomNotFoundException(ObjectNotFoundException):
+    detail = "Комната не найдена"
+
+
 class ObjectAlreadyExistsException(BookingsException):
-    detail = "Объект не найден"
-
-
-class AllRoomsAreBookedException(BookingsException):
-    detail = "Не осталось свободных номеров"
+    detail = "Объект уже существует"
 
 
 class BookingsHTTPException(HTTPException):
@@ -40,6 +48,13 @@ class RoomNotFoundHTTPException(BookingsHTTPException):
     detail = "Номер не найден"
 
 
+class NoRoomsForBookingFoundHTTPException(BookingsHTTPException):
+    status_code = 404
+    detail = "На эти даты не осталось комнат"
+
+
 def check_date_to_after_date_from(date_from: date, date_to: date) -> None:
     if date_to <= date_from:
         raise HTTPException(status_code=422, detail="Дата выезда не может быть раньше даты заезда")
+
+

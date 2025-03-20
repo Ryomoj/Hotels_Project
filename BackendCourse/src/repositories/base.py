@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from sqlalchemy import select, insert, update, delete
 
 from asyncpg.exceptions import UniqueViolationError
-from src.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException
+from src.exceptions.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException
 from src.repositories.mappers.base import DataMapper
 
 
