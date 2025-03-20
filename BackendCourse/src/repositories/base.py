@@ -1,11 +1,11 @@
-from typing import Sequence
+from typing import Sequence, Any
 
-import sqlalchemy.exc
+from sqlalchemy.exc import IntegrityError, NoResultFound
 from pydantic import BaseModel
 from sqlalchemy import select, insert, update, delete
-from asyncpg.exceptions import UniqueViolationError
 
-from src.exceptions import ObjectNotFoundException, DatabaseConflictException
+from asyncpg.exceptions import UniqueViolationError
+from src.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException
 from src.repositories.mappers.base import DataMapper
 
 
@@ -37,18 +37,21 @@ class BaseRepository:
         result = await self.session.execute(query)
         try:
             model = result.scalar_one()
-        except sqlalchemy.exc.NoResultFound:
+        except NoResultFound:
             raise ObjectNotFoundException
         return self.mapper.map_to_domain_entity(model)
 
-    async def add(self, data: BaseModel):
-        add_data_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
+    async def add(self, data: BaseModel) -> BaseModel | Any:
         try:
+            add_data_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
             result = await self.session.execute(add_data_stmt)
             model = result.scalars().one()
-        except sqlalchemy.exc.IntegrityError:
-            raise DatabaseConflictException
-        return self.mapper.map_to_domain_entity(model)
+            return self.mapper.map_to_domain_entity(model)
+        except IntegrityError as exc:
+            if isinstance(exc.orig.__cause__, UniqueViolationError):
+                raise ObjectAlreadyExistsException from exc
+            else:
+                raise exc
 
     async def add_bulk(self, data: Sequence[BaseModel]):
         add_data_stmt = insert(self.model).values([item.model_dump() for item in data])
@@ -60,14 +63,8 @@ class BaseRepository:
             .filter_by(**filter_by)
             .values(**data.model_dump(exclude_unset=exclude_unset))
         )
-        # try:
         await self.session.execute(update_stmt)
-#         except sqlalchemy.exc.IntegrityError:
-#             raise DatabaseConflictException
 
     async def delete(self, **filter_by) -> None:
         delete_stmt = delete(self.model).filter_by(**filter_by)
-        try:
-            await self.session.execute(delete_stmt)
-        except sqlalchemy.exc.IntegrityError:
-            raise DatabaseConflictException
+        await self.session.execute(delete_stmt)

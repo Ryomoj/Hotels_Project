@@ -1,15 +1,11 @@
 from pygments.lexers import data
 from sqlalchemy import select, func
 
-from src.exceptions import DateConflictException
 from src.models.bookings import BookingsOrm
 from src.models.rooms import RoomsOrm
 
 
 def rooms_ids_for_booking(date_from: data, date_to: data, hotel_id: int | None = None):
-    if date_to < date_from:
-        raise DateConflictException
-
     rooms_count = (
         select(BookingsOrm.room_id, func.count("*").label("rooms_booked"))
         .select_from(BookingsOrm)
@@ -17,7 +13,6 @@ def rooms_ids_for_booking(date_from: data, date_to: data, hotel_id: int | None =
         .group_by(BookingsOrm.room_id)
         .cte(name="rooms_count")
     )
-
 
     rooms_left_table = (
         select(

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Response
 
 from src.api.dependencies import UserIdDep, DatabaseDep
-from src.exceptions import DatabaseConflictException
+from src.exceptions import ObjectAlreadyExistsException
 from src.schemas.users import UserRequestAddSchema, UserAddSchema
 from src.services.auth import AuthService
 
@@ -12,13 +12,12 @@ router = APIRouter(prefix="/auth", tags=["Авторизация и аутент
 async def register_user(data: UserRequestAddSchema, db: DatabaseDep):
     hashed_password = AuthService().hash_password(password=data.password)
     new_user_data = UserAddSchema(email=data.email, hashed_password=hashed_password)
-
     try:
         await db.users.add(new_user_data)
-    except DatabaseConflictException:
-        raise HTTPException(status_code=409, detail="Пользователь уже зарегистрирован")
+        await db.commit()
+    except ObjectAlreadyExistsException:
+        raise HTTPException(status_code=409, detail="Пользователь с таким email уже зарегистрирован")
 
-    await db.commit()
     return {"Status": "OK"}
 
 
