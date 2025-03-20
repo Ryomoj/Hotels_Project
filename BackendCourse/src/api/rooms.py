@@ -1,3 +1,4 @@
+import logging
 from datetime import date
 
 from fastapi import APIRouter, Body, Query, HTTPException
@@ -48,7 +49,7 @@ async def create_room(hotel_id: int, db: DatabaseDep, room_data: RoomAddRequestS
     try:
         await db.hotels.get_one(id=hotel_id)
     except ObjectNotFoundException:
-        raise RoomNotFoundHTTPException
+        raise HotelNotFoundHTTPException
     _room_data = RoomAddSchema(hotel_id=hotel_id, **room_data.model_dump())
     room = await db.rooms.add(_room_data)
 

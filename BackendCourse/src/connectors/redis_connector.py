@@ -1,14 +1,19 @@
-import redis.asyncio as redis
+import logging
+
+import redis.asyncio as _redis
 
 
 class RedisConnector:
+    redis: _redis.Redis
+
     def __init__(self, host: str, port: int):
         self.host = host
         self.port = port
-        self.redis = None
 
     async def connect(self):
-        self.redis = await redis.Redis(host=self.host, port=self.port)
+        logging.info(f"Начинаю подключение к Redis host={self.host}, post={self.port}")
+        self.redis = await _redis.Redis(host=self.host, port=self.port)
+        logging.info(f"Успешное подключение к Redis host={self.host}, post={self.port}")
 
     async def set(self, key: str, value: str, expire: int = None):
         if expire:

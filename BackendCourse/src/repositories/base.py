@@ -1,3 +1,4 @@
+import logging
 from typing import Sequence, Any
 
 from sqlalchemy.exc import IntegrityError, NoResultFound
@@ -48,9 +49,15 @@ class BaseRepository:
             model = result.scalars().one()
             return self.mapper.map_to_domain_entity(model)
         except IntegrityError as exc:
+            logging.error(
+                f"Не удалось добавить данные в БД, входные данные={data} тип ошибки: {type(exc.orig.__cause__)=}"
+            )
             if isinstance(exc.orig.__cause__, UniqueViolationError):
                 raise ObjectAlreadyExistsException from exc
             else:
+                logging.error(
+                    f"Незнакомая ошибка, Не удалось добавить данные в БД, входные данные={data} тип ошибки: {type(exc.orig.__cause__)=}"
+                )
                 raise exc
 
     async def add_bulk(self, data: Sequence[BaseModel]):
