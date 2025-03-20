@@ -1,9 +1,8 @@
 from datetime import date
 
-from fastapi import HTTPException
 from sqlalchemy import select
 
-from src.exceptions.exceptions import AllRoomsAreBookedException, NoRoomsForBookingException
+from src.exceptions.exceptions import NoRoomsForBookingException
 from src.models.bookings import BookingsOrm
 from src.repositories.base import BaseRepository
 from src.repositories.mappers.mappers import BookingDataMapper

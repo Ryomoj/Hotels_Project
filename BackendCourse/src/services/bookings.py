@@ -1,6 +1,5 @@
 from src.api.dependencies import UserIdDep
-from src.exceptions.exceptions import ObjectNotFoundException, AllRoomsAreBookedException, \
-    BookingsException, RoomNotFoundException, NoRoomsForBookingException
+from src.exceptions.exceptions import ObjectNotFoundException, RoomNotFoundException, NoRoomsForBookingException
 from src.schemas.bookings import BookingAddRequestSchema, BookingAddSchema
 from src.services.base import BaseService
 

@@ -1,10 +1,13 @@
 from datetime import datetime, timezone, timedelta
 
 import jwt
-from fastapi import HTTPException
+from fastapi.openapi.models import Response
 from passlib.context import CryptContext
 
 from src.config import settings
+from src.exceptions.exceptions import ObjectAlreadyExistsException, UserAlreadyExistsException, \
+    EmailIsNotRegisteredException, IncorrectPasswordException, IncorrectTokenException
+from src.schemas.users import UserRequestAddSchema, UserAddSchema
 from src.services.base import BaseService
 
 
@@ -32,4 +35,32 @@ class AuthService(BaseService):
         try:
             return jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=settings.JWT_ALGORITHM)
         except jwt.exceptions.DecodeError:
-            raise HTTPException(status_code=401, detail="Неверный токен")
+            raise IncorrectTokenException
+
+    async def register_user(self, data: UserRequestAddSchema):
+        hashed_password = AuthService().hash_password(password=data.password)
+        new_user_data = UserAddSchema(email=data.email, hashed_password=hashed_password)
+        try:
+            await self.db.users.add(new_user_data)
+            await self.db.commit()
+        except ObjectAlreadyExistsException as exc:
+            raise UserAlreadyExistsException from exc
+
+    async def login_user(self, data: UserRequestAddSchema, response: Response):
+        user = await self.db.users.get_user_with_hashed_password(email=data.email)
+        if not user:
+            raise EmailIsNotRegisteredException
+        if not AuthService().verify_password(data.password, user.hashed_password):
+            raise IncorrectPasswordException
+        access_token = AuthService().create_access_token({"user_id": user.id})
+        response.set_cookie("access_token", access_token)
+
+        return access_token
+
+    async def get_auth(self, user_id):
+        user = await self.db.users.get_one_or_none(id=user_id)
+        return user
+
+    async def logout(self, response: Response) -> None:
+        response.delete_cookie("access_token")
+

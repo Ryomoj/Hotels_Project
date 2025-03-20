@@ -30,6 +30,22 @@ class ObjectAlreadyExistsException(BookingsException):
     detail = "Объект уже существует"
 
 
+class IncorrectTokenException(BookingsException):
+    detail = "Некорректный токен"
+
+
+class EmailIsNotRegisteredException(BookingsException):
+    detail = "Пользователь с таким email не зарегистрирован"
+
+
+class IncorrectPasswordException(BookingsException):
+    detail = "Неверный пароль"
+
+
+class UserAlreadyExistsException(BookingsException):
+    detail = "Пользователь уже существует"
+
+
 class BookingsHTTPException(HTTPException):
     status_code = 500
     detail = None
@@ -51,6 +67,26 @@ class RoomNotFoundHTTPException(BookingsHTTPException):
 class NoRoomsForBookingFoundHTTPException(BookingsHTTPException):
     status_code = 404
     detail = "На эти даты не осталось комнат"
+
+
+class IncorrectTokenHTTPException(BookingsHTTPException):
+    status_code = 404
+    detail = "Неверный токен"
+
+
+class EmailIsNotRegisteredHTTPException(BookingsHTTPException):
+    status_code = 404
+    detail = "Пользователь с таким email не зарегистрирован"
+
+
+class IncorrectPasswordHTTPException(BookingsHTTPException):
+    status_code = 404
+    detail = "Неверный пароль"
+
+
+class UserEmailAlreadyExistsHTTPException(BookingsHTTPException):
+    status_code = 409
+    detail = "Такой email уже зарегистрирован"
 
 
 def check_date_to_after_date_from(date_from: date, date_to: date) -> None:

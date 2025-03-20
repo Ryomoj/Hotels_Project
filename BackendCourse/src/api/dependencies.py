@@ -3,6 +3,7 @@ from fastapi import Depends, Query, HTTPException, Request
 from pydantic import BaseModel
 
 from src.database import async_session_maker
+from src.exceptions.exceptions import IncorrectTokenException, IncorrectTokenHTTPException
 from src.services.auth import AuthService
 from src.utils.db_manager import DBManager
 
@@ -23,7 +24,10 @@ def get_token(request: Request) -> str:
 
 
 def get_current_user_id(token: str = Depends(get_token)) -> int:
-    user_data = AuthService().decode_token(token)
+    try:
+        user_data = AuthService().decode_token(token)
+    except IncorrectTokenException:
+        raise IncorrectTokenHTTPException
     return user_data["user_id"]
 
 
