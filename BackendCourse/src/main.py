@@ -12,7 +12,7 @@ import uvicorn
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 from src.api.dependencies import get_db
 from src.init import redis_connector
@@ -43,7 +43,7 @@ async def lifespan(app: FastAPI):
     FastAPICache.init(RedisBackend(redis_connector.redis), prefix="fastapi-cache")
     logging.info("FastAPI cache initialized")
     yield
-    # При выключение проекта
+    # При выключении проекта
     await redis_connector.disconnect()
 
 
@@ -58,4 +58,4 @@ app.include_router(router_images)
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", reload=True)
