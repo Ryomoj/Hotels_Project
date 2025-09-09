@@ -1,0 +1,60 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: booking_postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: ew48ufpas9e4fpw9e4fUIWEH
+      POSTGRES_DB: booking
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d booking" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.4
+    container_name: booking_cache
+    ports:
+      - "6379:6379"
+    networks:
+      - myNetwork
+
+  booking_back_service:
+    container_name: "booking_back"
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    networks:
+      - myNetwork
+    env_file:
+      - .env
+
+
+  booking_celery_worker_service:
+    container_name: "booking_celery_worker"
+    build:
+      context: .
+    networks:
+      - myNetwork
+    env_file:
+      - .env
+    command: "celery --app=src.tasks.celery_app:celery_instance worker -l INFO"
+
+
+  booking_celery_beat_service:
+    container_name: "booking_celery_beat"
+    build:
+      context: .
+    networks:
+      - myNetwork
+    env_file:
+      - .env
+    command: "celery --app=src.tasks.celery_app:celery_instance beat -l INFO"
+
+networks:
+  myNetwork:
+    external: true

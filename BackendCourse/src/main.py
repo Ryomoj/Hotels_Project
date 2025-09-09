@@ -15,7 +15,19 @@ sys.path.append(str(Path(__file__).parent.parent))
 logging.basicConfig(level=logging.DEBUG)
 
 from src.api.dependencies import get_db
-from src.init import redis_connector
+from src.connectors.redis_connector import redis_connector
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # При старте проекта
+    await redis_connector.connect()
+    FastAPICache.init(RedisBackend(redis_connector.redis), prefix="fastapi-cache")
+    logging.info("FastAPI cache initialized")
+    yield
+    # При выключении проекта
+    await redis_connector.disconnect()
+
 from src.api.auth import router as router_auth
 from src.api.hotels import router as router_hotels
 from src.api.rooms import router as router_rooms
@@ -36,18 +48,7 @@ async def run_send_email_regularly():
         await asyncio.sleep(5)
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # При старте проекта
-    await redis_connector.connect()
-    FastAPICache.init(RedisBackend(redis_connector.redis), prefix="fastapi-cache")
-    logging.info("FastAPI cache initialized")
-    yield
-    # При выключение проекта
-    await redis_connector.disconnect()
-
-
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 app.include_router(router_auth)
 app.include_router(router_hotels)
@@ -58,4 +59,4 @@ app.include_router(router_images)
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", reload=True)
+    uvicorn.run(app, host="0.0.0.0", port=8000)

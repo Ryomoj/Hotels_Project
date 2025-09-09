@@ -11,9 +11,9 @@ celery_instance = Celery(
     # result_backend=settings.REDIS_URL
 )
 
-celery_instance.conf.beat_schedule = {
-    "luboe_nazvanie": {
-        "task": "booking_today_check_in",
-        "schedule": 5,
-    }
-}
+# celery_instance.conf.beat_schedule = {
+#     "luboe_nazvanie": {
+#         "task": "booking_today_check_in",
+#         "schedule": 5,
+#     }
+# }

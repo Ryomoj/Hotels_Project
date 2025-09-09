@@ -41,7 +41,7 @@ def resize_image(image_path: str):
 async def get_bookings_with_today_check_in_helper():
     logging.debug("Я ЗАПУСКАЮСЬ")
     async with DBManager(session_factory=async_session_maker_null_pool) as db:
-        bookings = await db.bookings.get_bookings_with_today_check_in
+        bookings = await db.bookings.get_bookings_with_today_check_in()
         logging.debug(f"{bookings=}")
 
 
